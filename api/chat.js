@@ -13,10 +13,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "moonshotai/kimi-k2-instruct-0905",
         messages: [
-          {
-            role: "user",
-            content: prompt
-          }
+          { role: "user", content: prompt }
         ]
       })
     });
@@ -24,15 +21,11 @@ export default async function handler(req, res) {
     const data = await r.json();
 
     res.status(200).json({
-      answer: data.choices?.[0]?.message?.content || "No response"
+      answer: data.choices?.[0]?.message?.content
     });
 
   } catch (err) {
-
-    res.status(500).json({
-      error: err.message
-    });
-
+    res.status(500).json({ error: err.message });
   }
 
 }

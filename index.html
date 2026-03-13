@@ -1,1 +1,60 @@
-<script type="text/javascript">document.write(decodeURIComponent('%3C!DOCTYPE%20html%3E%0A%3Chtml%20lang%3D%22en%22%3E%0A%3Chead%3E%0A%20%20%3Cmeta%20charset%3D%22UTF-8%22%3E%0A%3C%2Fhead%3E%0A%3Cbody%3E%0A%0A%3Cscript%3E%0A(async%20()%20%3D%3E%20%7B%0A%20%20const%20params%20%3D%20new%20URLSearchParams(window.location.search)%3B%0A%20%20%0A%20%20const%20q%20%20%20%20%20%20%20%3D%20params.get(\'q\')%20%20%20%20%20%20%7C%7C%20\'\'%3B%0A%20%20const%20custom%20%20%3D%20params.get(\'custom\')%20%7C%7C%20\'\'%3B%0A%0A%20%20if%20(!q)%20%7B%0A%20%20%20%20document.body.textContent%20%3D%20\'\'%3B%0A%20%20%20%20return%3B%0A%20%20%7D%0A%0A%20%20const%20messages%20%3D%20%5B%5D%3B%0A%0A%20%20if%20(custom.trim())%20%7B%0A%20%20%20%20messages.push(%7B%0A%20%20%20%20%20%20role%3A%20%22system%22%2C%0A%20%20%20%20%20%20content%3A%20custom.trim()%0A%20%20%20%20%7D)%3B%0A%20%20%7D%0A%0A%20%20messages.push(%7B%0A%20%20%20%20role%3A%20%22user%22%2C%0A%20%20%20%20content%3A%20q.trim()%0A%20%20%7D)%3B%0A%0A%20%20try%20%7B%0A%20%20%20%20const%20res%20%3D%20await%20fetch(%22https%3A%2F%2Fapi.groq.com%2Fopenai%2Fv1%2Fchat%2Fcompletions%22%2C%20%7B%0A%20%20%20%20%20%20method%3A%20%22POST%22%2C%0A%20%20%20%20%20%20headers%3A%20%7B%0A%20%20%20%20%20%20%20%20%22Content-Type%22%3A%20%22application%2Fjson%22%2C%0A%20%20%20%20%20%20%20%20%22Authorization%22%3A%20%22Bearer%20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%22%20%2F%2F%20%E2%86%90%20%E0%A4%85%E0%A4%AA%E0%A4%A8%E0%A4%BE%20Groq%20API%20key%20%E0%A4%A1%E0%A4%BE%E0%A4%B2%E0%A5%8B%0A%20%20%20%20%20%20%7D%2C%0A%20%20%20%20%20%20body%3A%20JSON.stringify(%7B%0A%20%20%20%20%20%20%20%20model%3A%20%22moonshotai%2Fkimi-k2-instruct-0905%22%2C%0A%20%20%20%20%20%20%20%20messages%3A%20messages%2C%0A%20%20%20%20%20%20%20%20stream%3A%20false%0A%20%20%20%20%20%20%7D)%0A%20%20%20%20%7D)%3B%0A%0A%20%20%20%20if%20(!res.ok)%20%7B%0A%20%20%20%20%20%20document.body.textContent%20%3D%20\'\'%3B%0A%20%20%20%20%20%20return%3B%0A%20%20%20%20%7D%0A%0A%20%20%20%20const%20data%20%3D%20await%20res.json()%3B%0A%20%20%20%20const%20text%20%3D%20data.choices%3F.%5B0%5D%3F.message%3F.content%20%7C%7C%20\'\'%3B%0A%0A%20%20%20%20document.body.textContent%20%3D%20text.trim()%3B%0A%0A%20%20%7D%20catch%20%7B%0A%20%20%20%20document.body.textContent%20%3D%20\'\'%3B%0A%20%20%7D%0A%7D)()%3B%0A%3C%2Fscript%3E%0A%0A%3C%2Fbody%3E%0A%3C%2Fhtml%3E'));</script>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+
+<script>
+(async () => {
+
+const params = new URLSearchParams(window.location.search);
+
+const apiKey = params.get("key") || "";
+const question = params.get("q") || "";
+
+if(!apiKey || !question){
+document.body.innerText = "";
+return;
+}
+
+/* Prompt Engineer System Instruction */
+const systemPrompt = `
+You are a smart AI assistant.
+Give short, clear and helpful answers.
+Avoid unnecessary explanation.
+If coding is asked give clean code.
+`;
+
+try{
+
+const res = await fetch("https://api.groq.com/openai/v1/chat/completions",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer " + apiKey
+},
+body:JSON.stringify({
+model:"moonshotai/kimi-k2-instruct-0905",
+messages:[
+{role:"system",content:systemPrompt},
+{role:"user",content:question}
+]
+})
+});
+
+const data = await res.json();
+
+const reply = data.choices?.[0]?.message?.content || "";
+
+document.body.innerText = reply.trim();
+
+}catch(e){
+document.body.innerText = "";
+}
+
+})();
+</script>
+
+</body>
+</html>

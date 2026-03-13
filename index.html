@@ -1,30 +1,21 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="UTF-8">
-</head>
 <body>
 
 <script>
 (async () => {
 
-const params = new URLSearchParams(window.location.search);
+const params = new URLSearchParams(location.search);
 
-const apiKey = params.get("key") || "";
-const question = params.get("q") || "";
+const key = params.get("key");
+const q = params.get("q");
 
-if(!apiKey || !question){
-document.body.innerText = "";
+if(!key || !q){
+document.body.innerText = "Missing key or q";
 return;
 }
 
-/* Prompt Engineer System Instruction */
-const systemPrompt = `
-You are a smart AI assistant.
-Give short, clear and helpful answers.
-Avoid unnecessary explanation.
-If coding is asked give clean code.
-`;
+const systemPrompt = "You are a helpful AI assistant. Reply short and clear.";
 
 try{
 
@@ -32,25 +23,31 @@ const res = await fetch("https://api.groq.com/openai/v1/chat/completions",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
-"Authorization":"Bearer " + apiKey
+"Authorization":"Bearer "+key
 },
 body:JSON.stringify({
 model:"moonshotai/kimi-k2-instruct-0905",
 messages:[
 {role:"system",content:systemPrompt},
-{role:"user",content:question}
+{role:"user",content:q}
 ]
 })
 });
 
+if(!res.ok){
+document.body.innerText = await res.text();
+return;
+}
+
 const data = await res.json();
 
-const reply = data.choices?.[0]?.message?.content || "";
-
-document.body.innerText = reply.trim();
+document.body.innerText =
+data.choices?.[0]?.message?.content || "No response";
 
 }catch(e){
-document.body.innerText = "";
+
+document.body.innerText = e.toString();
+
 }
 
 })();

@@ -5,21 +5,21 @@
 <script>
 (async () => {
 
-const params = new URLSearchParams(location.search);
+const url = new URL(location.href);
 
-const key = params.get("key");
-const q = params.get("q");
+const key = url.searchParams.get("key");
+const q = url.searchParams.get("q");
 
 if(!key || !q){
-document.body.innerText = "Missing key or q";
+document.body.innerText="Missing key or q";
 return;
 }
 
-const systemPrompt = "You are a helpful AI assistant. Reply short and clear.";
+const systemPrompt="You are a helpful AI assistant. Reply short.";
 
 try{
 
-const res = await fetch("https://api.groq.com/openai/v1/chat/completions",{
+const r = await fetch("https://api.groq.com/openai/v1/chat/completions",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
@@ -34,19 +34,13 @@ messages:[
 })
 });
 
-if(!res.ok){
-document.body.innerText = await res.text();
-return;
-}
+const d = await r.json();
 
-const data = await res.json();
-
-document.body.innerText =
-data.choices?.[0]?.message?.content || "No response";
+document.body.innerText=d.choices[0].message.content;
 
 }catch(e){
 
-document.body.innerText = e.toString();
+document.body.innerText=e;
 
 }
 

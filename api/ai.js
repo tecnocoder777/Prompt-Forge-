@@ -1,1 +1,47 @@
-ZXhwb3J0IGRlZmF1bHQgYXN5bmMgZnVuY3Rpb24gaGFuZGxlcihyZXEsIHJlcykgewoKY29uc3QgcSA9IHJlcS5xdWVyeS5xOwoKaWYoIXEpewpyZXMuc3RhdHVzKDQwMCkuc2VuZCgiTm8gcXVlc3Rpb24iKTsKcmV0dXJuOwp9Cgpjb25zdCByID0gYXdhaXQgZmV0Y2goImh0dHBzOi8vYXBpLmdyb3EuY29tL29wZW5haS92MS9jaGF0L2NvbXBsZXRpb25zIix7Cm1ldGhvZDoiUE9TVCIsCmhlYWRlcnM6ewoiQ29udGVudC1UeXBlIjoiYXBwbGljYXRpb24vanNvbiIsCiJBdXRob3JpemF0aW9uIjoiQmVhcmVyIGdza19FYTI0dUFpcUp6c0FCcW1BODBWRldHZHliM0ZZR1pwM0NVWXRXU2Z3UXF4aXllYXJmM0FWIgp9LApib2R5OkpTT04uc3RyaW5naWZ5KHsKbW9kZWw6Im1vb25zaG90YWkva2ltaS1rMi1pbnN0cnVjdC0wOTA1IiwKbWVzc2FnZXM6Wwp7cm9sZToic3lzdGVtIixjb250ZW50OiJZb3UgYXJlIGhlbHBmdWwgQUkifSwKe3JvbGU6InVzZXIiLGNvbnRlbnQ6cX0KXQp9KQp9KTsKCmNvbnN0IGRhdGEgPSBhd2FpdCByLmpzb24oKTsKCnJlcy5zZW5kKGRhdGEuY2hvaWNlc1swXS5tZXNzYWdlLmNvbnRlbnQpOwoKfQ==
+export default async function handler(req, res) {
+
+const q = req.query.q;
+const key = req.query.key;
+
+if(!q){
+res.status(400).send("No question");
+return;
+}
+
+if(!key){
+res.status(400).send("No API key");
+return;
+}
+
+try{
+
+const r = await fetch("https://api.groq.com/openai/v1/chat/completions",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer " + key
+},
+body:JSON.stringify({
+model:"moonshotai/kimi-k2-instruct-0905",
+messages:[
+{role:"system",content:"You are a helpful AI assistant. Reply short and clear."},
+{role:"user",content:q}
+]
+})
+});
+
+const data = await r.json();
+
+res.setHeader("Content-Type","text/plain");
+
+res.send(
+data?.choices?.[0]?.message?.content || "No response"
+);
+
+}catch(e){
+
+res.status(500).send(e.toString());
+
+}
+
+}

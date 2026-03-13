@@ -2,6 +2,7 @@ export default async function handler(req, res) {
 
 const q = req.query.q;
 const key = req.query.key;
+const ci = req.query.ci || "You are a helpful AI assistant. Reply short and clear.";
 
 if(!q){
 res.status(400).send("No question");
@@ -24,7 +25,7 @@ headers:{
 body:JSON.stringify({
 model:"moonshotai/kimi-k2-instruct-0905",
 messages:[
-{role:"system",content:"You are a helpful AI assistant. Reply short and clear."},
+{role:"system",content:ci},
 {role:"user",content:q}
 ]
 })

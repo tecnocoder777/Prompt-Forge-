@@ -1,18 +1,27 @@
+const sessions = {};
+
 export default async function handler(req, res) {
 
 const q = req.query.q;
 const key = req.query.key;
-const ci = req.query.ci || "You are a helpful AI assistant. Reply short and clear.";
+const sid = req.query.sid || "default";
+const ci = req.query.ci || "You are a helpful AI assistant.";
 
-if(!q){
-res.status(400).send("No question");
+if(!q || !key){
+res.status(400).send("Missing q or key");
 return;
 }
 
-if(!key){
-res.status(400).send("No API key");
-return;
+if(!sessions[sid]){
+sessions[sid] = [
+{role:"system",content:ci}
+];
 }
+
+sessions[sid].push({
+role:"user",
+content:q
+});
 
 try{
 
@@ -20,24 +29,26 @@ const r = await fetch("https://api.groq.com/openai/v1/chat/completions",{
 method:"POST",
 headers:{
 "Content-Type":"application/json",
-"Authorization":"Bearer " + key
+"Authorization":"Bearer "+key
 },
 body:JSON.stringify({
 model:"moonshotai/kimi-k2-instruct-0905",
-messages:[
-{role:"system",content:ci},
-{role:"user",content:q}
-]
+messages:sessions[sid]
 })
 });
 
 const data = await r.json();
 
+const reply = data?.choices?.[0]?.message?.content || "No response";
+
+sessions[sid].push({
+role:"assistant",
+content:reply
+});
+
 res.setHeader("Content-Type","text/plain");
 
-res.send(
-data?.choices?.[0]?.message?.content || "No response"
-);
+res.send(reply);
 
 }catch(e){
 

@@ -4,8 +4,7 @@ export default async function handler(req, res) {
   const key = req.query.key;
 
   if (!q || !key) {
-    res.status(400).send("Missing q or key");
-    return;
+    return res.status(400).send("Missing q or key");
   }
 
   try {
@@ -17,19 +16,21 @@ export default async function handler(req, res) {
         "Authorization": "Bearer " + key
       },
       body: JSON.stringify({
-        model: "moonshotai/kimi-k2-instruct-0905",
+        model: "llama3-70b-8192", // 👈 change model
         messages: [
-          {
-            role: "user",
-            content: q
-          }
+          { role: "user", content: q }
         ]
       })
     });
 
     const data = await r.json();
 
-    const reply = data?.choices?.[0]?.message?.content || "No response";
+    // 👇 debug full response
+    if (!data.choices) {
+      return res.send(JSON.stringify(data));
+    }
+
+    const reply = data.choices[0].message.content;
 
     res.setHeader("Content-Type", "text/plain");
     res.send(reply);

@@ -16,7 +16,7 @@ export default async function handler(req, res) {
         "Authorization": "Bearer " + key
       },
       body: JSON.stringify({
-        model: "llama3-70b-8192", // 👈 change model
+        model: "moonshotai/kimi-k2-instruct-0905", // 👈 change model
         messages: [
           { role: "user", content: q }
         ]
